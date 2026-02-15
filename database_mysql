@@ -1,0 +1,780 @@
+CREATE DATABASE student_portal;
+USE student_portal;
+
+CREATE TABLE students (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100),
+    email VARCHAR(100),
+    department VARCHAR(50)
+);
+
+CREATE TABLE courses (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    course_name VARCHAR(100),
+    course_code VARCHAR(50)
+);
+
+CREATE TABLE users (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(50) UNIQUE NOT NULL,
+    password VARCHAR(100) NOT NULL,
+    role VARCHAR(20)   -- ADMIN or STUDENT
+);
+
+
+DELETE FROM users;
+INSERT INTO users (username, password, role)
+VALUES ('swetha', '1234', 'ADMIN');
+
+SELECT * FROM users;
+
+INSERT INTO users (username, password, role)
+VALUES ('john', '1234', 'STUDENT');
+
+SELECT * FROM users;
+
+USE student_portal;
+
+-- Update students table
+ALTER TABLE students 
+ADD COLUMN phone VARCHAR(20),
+ADD COLUMN address VARCHAR(200),
+ADD COLUMN enrollment_date DATE,
+ADD COLUMN student_id VARCHAR(20) UNIQUE;
+
+-- Create enrollments table
+CREATE TABLE enrollments (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    student_id BIGINT NOT NULL,
+    course_id BIGINT NOT NULL,
+    grade VARCHAR(5),
+    status VARCHAR(20),
+    FOREIGN KEY (student_id) REFERENCES students(id) ON DELETE CASCADE,
+    FOREIGN KEY (course_id) REFERENCES courses(id) ON DELETE CASCADE
+);
+
+
+
+USE student_portal;
+
+-- Update courses table with new fields
+ALTER TABLE courses 
+ADD COLUMN instructor VARCHAR(100),
+ADD COLUMN credits INT,
+ADD COLUMN semester VARCHAR(50),
+ADD COLUMN description TEXT;
+
+-- Sample courses
+INSERT INTO courses (course_name, course_code, instructor, credits, semester, description)
+VALUES 
+('Data Structures', 'CS101', 'Dr. Smith', 4, 'Fall 2024', 'Introduction to data structures'),
+('Database Systems', 'CS201', 'Dr. Johnson', 3, 'Spring 2024', 'Database design and SQL'),
+('Web Development', 'CS301', 'Prof. Williams', 3, 'Fall 2024', 'Modern web technologies');
+
+USE student_portal;
+
+CREATE TABLE attendance (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    student_id BIGINT NOT NULL,
+    course_id BIGINT NOT NULL,
+    date DATE NOT NULL,
+    status VARCHAR(20) NOT NULL,
+    FOREIGN KEY (student_id) REFERENCES students(id) ON DELETE CASCADE,
+    FOREIGN KEY (course_id) REFERENCES courses(id) ON DELETE CASCADE
+);
+
+
+USE student_portal;
+
+CREATE TABLE timetable (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    course_id BIGINT NOT NULL,
+    day_of_week VARCHAR(20) NOT NULL,
+    start_time TIME NOT NULL,
+    end_time TIME NOT NULL,
+    room VARCHAR(50),
+    FOREIGN KEY (course_id) REFERENCES courses(id) ON DELETE CASCADE
+);
+
+-- Sample data
+INSERT INTO timetable (course_id, day_of_week, start_time, end_time, room)
+VALUES 
+(1, 'MONDAY', '09:00:00', '10:30:00', 'Room 101'),
+(1, 'WEDNESDAY', '09:00:00', '10:30:00', 'Room 101'),
+(2, 'TUESDAY', '11:00:00', '12:30:00', 'Lab 201'),
+(2, 'THURSDAY', '11:00:00', '12:30:00', 'Lab 201'),
+(3, 'FRIDAY', '14:00:00', '16:00:00', 'Room 305');
+
+
+USE student_portal;
+
+CREATE TABLE fees (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    student_id BIGINT NOT NULL,
+    fee_type VARCHAR(50) NOT NULL,
+    amount DECIMAL(10, 2) NOT NULL,
+    paid_amount DECIMAL(10, 2) DEFAULT 0.00,
+    status VARCHAR(20) DEFAULT 'PENDING',
+    due_date DATE NOT NULL,
+    paid_date DATE,
+    semester VARCHAR(50),
+    FOREIGN KEY (student_id) REFERENCES students(id) ON DELETE CASCADE
+);
+
+-- Sample fee data
+INSERT INTO fees (student_id, fee_type, amount, due_date, semester)
+VALUES 
+(2, 'TUITION', 50000.00, '2024-12-31', 'Fall 2024'),
+(2, 'LIBRARY', 5000.00, '2024-12-31', 'Fall 2024'),
+(2, 'LAB', 8000.00, '2024-12-31', 'Fall 2024');
+
+USE student_portal;
+
+CREATE TABLE notifications (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    user_id BIGINT NOT NULL,
+    title VARCHAR(200) NOT NULL,
+    message TEXT NOT NULL,
+    type VARCHAR(20) NOT NULL,
+    is_read BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Sample notifications
+INSERT INTO notifications (user_id, title, message, type)
+VALUES 
+(1, 'Welcome!', 'Welcome to Student Portal Management System', 'INFO'),
+(1, 'Fee Due', 'Your tuition fee is due on 31st December', 'WARNING');
+
+
+USE student_portal;
+
+-- Check existing tables
+SHOW TABLES;
+
+-- Create Fees table if not exists
+CREATE TABLE IF NOT EXISTS fees (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    student_id BIGINT NOT NULL,
+    fee_type VARCHAR(50) NOT NULL,
+    amount DECIMAL(10, 2) NOT NULL,
+    paid_amount DECIMAL(10, 2) DEFAULT 0.00,
+    status VARCHAR(20) DEFAULT 'PENDING',
+    due_date DATE NOT NULL,
+    paid_date DATE,
+    semester VARCHAR(50),
+    FOREIGN KEY (student_id) REFERENCES students(id) ON DELETE CASCADE
+);
+
+-- Create Timetable table if not exists
+CREATE TABLE IF NOT EXISTS timetable (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    course_id BIGINT NOT NULL,
+    day_of_week VARCHAR(20) NOT NULL,
+    start_time TIME NOT NULL,
+    end_time TIME NOT NULL,
+    room VARCHAR(50),
+    FOREIGN KEY (course_id) REFERENCES courses(id) ON DELETE CASCADE
+);
+
+-- Create Notifications table if not exists
+CREATE TABLE IF NOT EXISTS notifications (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    user_id BIGINT NOT NULL,
+    title VARCHAR(200) NOT NULL,
+    message TEXT NOT NULL,
+    type VARCHAR(20) NOT NULL,
+    is_read BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Create Attendance table if not exists
+CREATE TABLE IF NOT EXISTS attendance (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    student_id BIGINT NOT NULL,
+    course_id BIGINT NOT NULL,
+    date DATE NOT NULL,
+    status VARCHAR(20) NOT NULL,
+    FOREIGN KEY (student_id) REFERENCES students(id) ON DELETE CASCADE,
+    FOREIGN KEY (course_id) REFERENCES courses(id) ON DELETE CASCADE
+);
+
+-- Insert sample data for Fees
+INSERT INTO fees (student_id, fee_type, amount, due_date, semester)
+VALUES 
+(2, 'TUITION', 50000.00, '2024-12-31', 'Fall 2024'),
+(2, 'LIBRARY', 5000.00, '2024-12-31', 'Fall 2024'),
+(2, 'LAB', 8000.00, '2024-12-31', 'Fall 2024')
+ON DUPLICATE KEY UPDATE student_id=student_id;
+
+-- Insert sample data for Timetable
+INSERT INTO timetable (course_id, day_of_week, start_time, end_time, room)
+VALUES 
+(1, 'MONDAY', '09:00:00', '10:30:00', 'Room 101'),
+(1, 'WEDNESDAY', '09:00:00', '10:30:00', 'Room 101'),
+(2, 'TUESDAY', '11:00:00', '12:30:00', 'Lab 201'),
+(2, 'THURSDAY', '11:00:00', '12:30:00', 'Lab 201'),
+(3, 'FRIDAY', '14:00:00', '16:00:00', 'Room 305')
+ON DUPLICATE KEY UPDATE course_id=course_id;
+
+-- Verify tables
+SELECT 'Fees Table' as TableName, COUNT(*) as RecordCount FROM fees
+UNION ALL
+SELECT 'Timetable Table', COUNT(*) FROM timetable
+UNION ALL
+SELECT 'Attendance Table', COUNT(*) FROM attendance
+UNION ALL
+SELECT 'Notifications Table', COUNT(*) FROM notifications;
+
+USE student_portal;
+
+-- Add studentId column to users table
+ALTER TABLE users 
+ADD COLUMN student_id BIGINT,
+ADD FOREIGN KEY (student_id) REFERENCES students(id) ON DELETE CASCADE;
+
+-- Update existing admin user
+UPDATE users SET student_id = NULL WHERE role = 'ADMIN';
+
+-- Create a test student user linked to existing student
+-- (Assuming student with id=2 exists)
+UPDATE users SET student_id = 2 WHERE username = 'john';
+
+USE student_portal;
+
+-- =====================================================
+-- STEP 1: CLEAR EXISTING DATA (OPTIONAL - BE CAREFUL!)
+-- =====================================================
+SET FOREIGN_KEY_CHECKS = 0;
+TRUNCATE TABLE attendance;
+TRUNCATE TABLE enrollments;
+TRUNCATE TABLE fees;
+TRUNCATE TABLE notifications;
+TRUNCATE TABLE users;
+TRUNCATE TABLE students;
+-- Don't truncate courses and timetable as we'll reuse them
+SET FOREIGN_KEY_CHECKS = 1;
+
+-- =====================================================
+-- STEP 2: INSERT COURSES (if not already present)
+-- =====================================================
+INSERT INTO courses (course_name, course_code, instructor, credits, semester, description)
+VALUES 
+('Data Structures', 'CS101', 'Dr. Robert Smith', 4, 'Fall 2024', 'Introduction to data structures and algorithms'),
+('Database Systems', 'CS201', 'Dr. Emily Johnson', 3, 'Fall 2024', 'Relational database design and SQL'),
+('Web Development', 'CS301', 'Prof. Michael Williams', 3, 'Fall 2024', 'Modern web technologies - HTML, CSS, JavaScript'),
+('Operating Systems', 'CS202', 'Dr. Sarah Davis', 4, 'Fall 2024', 'OS concepts, processes, and memory management'),
+('Computer Networks', 'CS302', 'Prof. James Brown', 3, 'Fall 2024', 'Network protocols and architecture'),
+('Software Engineering', 'CS401', 'Dr. Patricia Miller', 4, 'Fall 2024', 'Software development lifecycle and methodologies'),
+('Artificial Intelligence', 'CS501', 'Dr. David Wilson', 4, 'Fall 2024', 'AI algorithms and machine learning basics'),
+('Mobile App Development', 'CS303', 'Prof. Jennifer Moore', 3, 'Fall 2024', 'iOS and Android application development'),
+('Cybersecurity', 'CS402', 'Dr. Christopher Taylor', 3, 'Fall 2024', 'Security principles and ethical hacking'),
+('Cloud Computing', 'CS502', 'Prof. Amanda Anderson', 3, 'Fall 2024', 'Cloud platforms and distributed systems')
+ON DUPLICATE KEY UPDATE course_name=course_name;
+
+-- =====================================================
+-- STEP 3: INSERT 20 STUDENTS
+-- =====================================================
+INSERT INTO students (name, email, department, phone, address, enrollment_date, student_id)
+VALUES 
+('Rajesh Kumar', 'rajesh.kumar@student.edu', 'Computer Science', '9876543210', '123 MG Road, Bangalore', '2024-08-15', 'ST0001'),
+('Priya Sharma', 'priya.sharma@student.edu', 'Computer Science', '9876543211', '456 Anna Salai, Chennai', '2024-08-15', 'ST0002'),
+('Amit Patel', 'amit.patel@student.edu', 'Information Technology', '9876543212', '789 SG Highway, Ahmedabad', '2024-08-15', 'ST0003'),
+('Sneha Reddy', 'sneha.reddy@student.edu', 'Computer Science', '9876543213', '321 Banjara Hills, Hyderabad', '2024-08-15', 'ST0004'),
+('Vikram Singh', 'vikram.singh@student.edu', 'Information Technology', '9876543214', '654 Connaught Place, New Delhi', '2024-08-15', 'ST0005'),
+('Anjali Verma', 'anjali.verma@student.edu', 'Computer Science', '9876543215', '987 Park Street, Kolkata', '2024-08-15', 'ST0006'),
+('Rahul Gupta', 'rahul.gupta@student.edu', 'Electronics', '9876543216', '159 FC Road, Pune', '2024-08-15', 'ST0007'),
+('Divya Nair', 'divya.nair@student.edu', 'Computer Science', '9876543217', '753 Marine Drive, Mumbai', '2024-08-15', 'ST0008'),
+('Karthik Krishnan', 'karthik.k@student.edu', 'Information Technology', '9876543218', '852 Brigade Road, Bangalore', '2024-08-15', 'ST0009'),
+('Meera Iyer', 'meera.iyer@student.edu', 'Computer Science', '9876543219', '951 Nungambakkam, Chennai', '2024-08-15', 'ST0010'),
+('Arjun Mehta', 'arjun.mehta@student.edu', 'Information Technology', '9876543220', '147 Satellite Road, Ahmedabad', '2024-08-15', 'ST0011'),
+('Pooja Desai', 'pooja.desai@student.edu', 'Computer Science', '9876543221', '258 Jubilee Hills, Hyderabad', '2024-08-15', 'ST0012'),
+('Rohit Joshi', 'rohit.joshi@student.edu', 'Electronics', '9876543222', '369 Saket, New Delhi', '2024-08-15', 'ST0013'),
+('Kavya Pillai', 'kavya.pillai@student.edu', 'Computer Science', '9876543223', '741 Salt Lake, Kolkata', '2024-08-15', 'ST0014'),
+('Aditya Rao', 'aditya.rao@student.edu', 'Information Technology', '9876543224', '852 Koregaon Park, Pune', '2024-08-15', 'ST0015'),
+('Riya Malhotra', 'riya.malhotra@student.edu', 'Computer Science', '9876543225', '963 Worli, Mumbai', '2024-08-15', 'ST0016'),
+('Sanjay Bhat', 'sanjay.bhat@student.edu', 'Information Technology', '9876543226', '147 Indiranagar, Bangalore', '2024-08-15', 'ST0017'),
+('Nisha Kapoor', 'nisha.kapoor@student.edu', 'Computer Science', '9876543227', '258 T Nagar, Chennai', '2024-08-15', 'ST0018'),
+('Varun Chawla', 'varun.chawla@student.edu', 'Electronics', '9876543228', '369 Navrangpura, Ahmedabad', '2024-08-15', 'ST0019'),
+('Simran Kaur', 'simran.kaur@student.edu', 'Computer Science', '9876543229', '741 Gachibowli, Hyderabad', '2024-08-15', 'ST0020');
+
+-- =====================================================
+-- STEP 4: CREATE USER ACCOUNTS FOR ALL STUDENTS
+-- =====================================================
+INSERT INTO users (username, password, role, student_id)
+VALUES 
+('rajesh', '1234', 'STUDENT', 1),
+('priya', '1234', 'STUDENT', 2),
+('amit', '1234', 'STUDENT', 3),
+('sneha', '1234', 'STUDENT', 4),
+('vikram', '1234', 'STUDENT', 5),
+('anjali', '1234', 'STUDENT', 6),
+('rahul', '1234', 'STUDENT', 7),
+('divya', '1234', 'STUDENT', 8),
+('karthik', '1234', 'STUDENT', 9),
+('meera', '1234', 'STUDENT', 10),
+('arjun', '1234', 'STUDENT', 11),
+('pooja', '1234', 'STUDENT', 12),
+('rohit', '1234', 'STUDENT', 13),
+('kavya', '1234', 'STUDENT', 14),
+('aditya', '1234', 'STUDENT', 15),
+('riya', '1234', 'STUDENT', 16),
+('sanjay', '1234', 'STUDENT', 17),
+('nisha', '1234', 'STUDENT', 18),
+('varun', '1234', 'STUDENT', 19),
+('simran', '1234', 'STUDENT', 20);
+
+-- Create admin user
+INSERT INTO users (username, password, role, student_id)
+VALUES ('swetha', '1234', 'ADMIN', NULL)
+ON DUPLICATE KEY UPDATE username=username;
+
+-- =====================================================
+-- STEP 5: ENROLL STUDENTS IN COURSES
+-- =====================================================
+-- Each student enrolled in 4-6 courses with grades
+
+-- Student 1: Rajesh Kumar (CS)
+INSERT INTO enrollments (student_id, course_id, status, grade) VALUES 
+(1, 1, 'ENROLLED', 'A'),
+(1, 2, 'ENROLLED', 'A+'),
+(1, 3, 'ENROLLED', 'B+'),
+(1, 4, 'ENROLLED', 'A'),
+(1, 6, 'ENROLLED', NULL);
+
+-- Student 2: Priya Sharma (CS)
+INSERT INTO enrollments (student_id, course_id, status, grade) VALUES 
+(2, 1, 'ENROLLED', 'A+'),
+(2, 2, 'ENROLLED', 'A'),
+(2, 5, 'ENROLLED', 'B'),
+(2, 7, 'ENROLLED', NULL),
+(2, 9, 'ENROLLED', NULL);
+
+-- Student 3: Amit Patel (IT)
+INSERT INTO enrollments (student_id, course_id, status, grade) VALUES 
+(3, 1, 'ENROLLED', 'B+'),
+(3, 3, 'ENROLLED', 'A'),
+(3, 8, 'ENROLLED', 'A'),
+(3, 10, 'ENROLLED', NULL);
+
+-- Student 4: Sneha Reddy (CS)
+INSERT INTO enrollments (student_id, course_id, status, grade) VALUES 
+(4, 2, 'ENROLLED', 'A+'),
+(4, 4, 'ENROLLED', 'A'),
+(4, 6, 'ENROLLED', 'B+'),
+(4, 7, 'ENROLLED', 'A'),
+(4, 9, 'ENROLLED', NULL);
+
+-- Student 5: Vikram Singh (IT)
+INSERT INTO enrollments (student_id, course_id, status, grade) VALUES 
+(5, 1, 'ENROLLED', 'A'),
+(5, 3, 'ENROLLED', 'B+'),
+(5, 5, 'ENROLLED', 'A'),
+(5, 8, 'ENROLLED', NULL);
+
+-- Student 6: Anjali Verma (CS)
+INSERT INTO enrollments (student_id, course_id, status, grade) VALUES 
+(6, 2, 'ENROLLED', 'A'),
+(6, 4, 'ENROLLED', 'A+'),
+(6, 6, 'ENROLLED', 'A'),
+(6, 7, 'ENROLLED', NULL),
+(6, 9, 'ENROLLED', NULL);
+
+-- Student 7: Rahul Gupta (Electronics)
+INSERT INTO enrollments (student_id, course_id, status, grade) VALUES 
+(7, 1, 'ENROLLED', 'B'),
+(7, 4, 'ENROLLED', 'B+'),
+(7, 5, 'ENROLLED', 'B'),
+(7, 9, 'ENROLLED', NULL);
+
+-- Student 8: Divya Nair (CS)
+INSERT INTO enrollments (student_id, course_id, status, grade) VALUES 
+(8, 1, 'ENROLLED', 'A+'),
+(8, 2, 'ENROLLED', 'A'),
+(8, 3, 'ENROLLED', 'A'),
+(8, 6, 'ENROLLED', 'A+'),
+(8, 7, 'ENROLLED', NULL);
+
+-- Student 9: Karthik Krishnan (IT)
+INSERT INTO enrollments (student_id, course_id, status, grade) VALUES 
+(9, 3, 'ENROLLED', 'A'),
+(9, 5, 'ENROLLED', 'B+'),
+(9, 8, 'ENROLLED', 'A'),
+(9, 10, 'ENROLLED', NULL);
+
+-- Student 10: Meera Iyer (CS)
+INSERT INTO enrollments (student_id, course_id, status, grade) VALUES 
+(10, 1, 'ENROLLED', 'A+'),
+(10, 2, 'ENROLLED', 'A+'),
+(10, 4, 'ENROLLED', 'A'),
+(10, 7, 'ENROLLED', 'A+'),
+(10, 9, 'ENROLLED', NULL);
+
+-- Student 11: Arjun Mehta (IT)
+INSERT INTO enrollments (student_id, course_id, status, grade) VALUES 
+(11, 1, 'ENROLLED', 'B+'),
+(11, 3, 'ENROLLED', 'A'),
+(11, 5, 'ENROLLED', 'B'),
+(11, 8, 'ENROLLED', NULL);
+
+-- Student 12: Pooja Desai (CS)
+INSERT INTO enrollments (student_id, course_id, status, grade) VALUES 
+(12, 2, 'ENROLLED', 'A'),
+(12, 4, 'ENROLLED', 'A'),
+(12, 6, 'ENROLLED', 'B+'),
+(12, 7, 'ENROLLED', NULL),
+(12, 9, 'ENROLLED', NULL);
+
+-- Student 13: Rohit Joshi (Electronics)
+INSERT INTO enrollments (student_id, course_id, status, grade) VALUES 
+(13, 1, 'ENROLLED', 'B'),
+(13, 4, 'ENROLLED', 'B+'),
+(13, 5, 'ENROLLED', 'B+'),
+(13, 9, 'ENROLLED', NULL);
+
+-- Student 14: Kavya Pillai (CS)
+INSERT INTO enrollments (student_id, course_id, status, grade) VALUES 
+(14, 1, 'ENROLLED', 'A+'),
+(14, 2, 'ENROLLED', 'A+'),
+(14, 6, 'ENROLLED', 'A'),
+(14, 7, 'ENROLLED', 'A'),
+(14, 9, 'ENROLLED', NULL);
+
+-- Student 15: Aditya Rao (IT)
+INSERT INTO enrollments (student_id, course_id, status, grade) VALUES 
+(15, 3, 'ENROLLED', 'A'),
+(15, 5, 'ENROLLED', 'A'),
+(15, 8, 'ENROLLED', 'B+'),
+(15, 10, 'ENROLLED', NULL);
+
+-- Student 16: Riya Malhotra (CS)
+INSERT INTO enrollments (student_id, course_id, status, grade) VALUES 
+(16, 1, 'ENROLLED', 'A'),
+(16, 2, 'ENROLLED', 'A+'),
+(16, 4, 'ENROLLED', 'A'),
+(16, 6, 'ENROLLED', NULL),
+(16, 7, 'ENROLLED', NULL);
+
+-- Student 17: Sanjay Bhat (IT)
+INSERT INTO enrollments (student_id, course_id, status, grade) VALUES 
+(17, 1, 'ENROLLED', 'B+'),
+(17, 3, 'ENROLLED', 'A'),
+(17, 8, 'ENROLLED', 'A'),
+(17, 10, 'ENROLLED', NULL);
+
+-- Student 18: Nisha Kapoor (CS)
+INSERT INTO enrollments (student_id, course_id, status, grade) VALUES 
+(18, 2, 'ENROLLED', 'A+'),
+(18, 4, 'ENROLLED', 'A+'),
+(18, 6, 'ENROLLED', 'A'),
+(18, 7, 'ENROLLED', 'A+'),
+(18, 9, 'ENROLLED', NULL);
+
+-- Student 19: Varun Chawla (Electronics)
+INSERT INTO enrollments (student_id, course_id, status, grade) VALUES 
+(19, 1, 'ENROLLED', 'B+'),
+(19, 4, 'ENROLLED', 'B'),
+(19, 5, 'ENROLLED', 'B+'),
+(19, 9, 'ENROLLED', NULL);
+
+-- Student 20: Simran Kaur (CS)
+INSERT INTO enrollments (student_id, course_id, status, grade) VALUES 
+(20, 1, 'ENROLLED', 'A'),
+(20, 2, 'ENROLLED', 'A'),
+(20, 3, 'ENROLLED', 'A+'),
+(20, 6, 'ENROLLED', 'A'),
+(20, 7, 'ENROLLED', NULL);
+
+-- =====================================================
+-- STEP 6: INSERT TIMETABLE FOR ALL COURSES
+-- =====================================================
+DELETE FROM timetable;
+
+INSERT INTO timetable (course_id, day_of_week, start_time, end_time, room) VALUES 
+-- CS101: Data Structures
+(1, 'MONDAY', '09:00:00', '10:30:00', 'Room 101'),
+(1, 'WEDNESDAY', '09:00:00', '10:30:00', 'Room 101'),
+(1, 'FRIDAY', '09:00:00', '10:30:00', 'Lab 101'),
+
+-- CS201: Database Systems
+(2, 'TUESDAY', '11:00:00', '12:30:00', 'Room 201'),
+(2, 'THURSDAY', '11:00:00', '12:30:00', 'Lab 201'),
+
+-- CS301: Web Development
+(3, 'MONDAY', '14:00:00', '16:00:00', 'Lab 301'),
+(3, 'FRIDAY', '14:00:00', '16:00:00', 'Lab 301'),
+
+-- CS202: Operating Systems
+(4, 'TUESDAY', '09:00:00', '10:30:00', 'Room 102'),
+(4, 'THURSDAY', '09:00:00', '10:30:00', 'Room 102'),
+(4, 'FRIDAY', '11:00:00', '12:30:00', 'Lab 102'),
+
+-- CS302: Computer Networks
+(5, 'MONDAY', '11:00:00', '12:30:00', 'Room 202'),
+(5, 'WEDNESDAY', '11:00:00', '12:30:00', 'Lab 202'),
+
+-- CS401: Software Engineering
+(6, 'TUESDAY', '14:00:00', '16:00:00', 'Room 301'),
+(6, 'THURSDAY', '14:00:00', '16:00:00', 'Room 301'),
+
+-- CS501: Artificial Intelligence
+(7, 'MONDAY', '16:00:00', '17:30:00', 'Room 401'),
+(7, 'WEDNESDAY', '16:00:00', '17:30:00', 'Lab 401'),
+
+-- CS303: Mobile App Development
+(8, 'TUESDAY', '16:00:00', '17:30:00', 'Lab 303'),
+(8, 'FRIDAY', '16:00:00', '17:30:00', 'Lab 303'),
+
+-- CS402: Cybersecurity
+(9, 'WEDNESDAY', '14:00:00', '15:30:00', 'Room 302'),
+(9, 'FRIDAY', '14:00:00', '15:30:00', 'Lab 302'),
+
+-- CS502: Cloud Computing
+(10, 'MONDAY', '13:00:00', '14:30:00', 'Room 402'),
+(10, 'THURSDAY', '16:00:00', '17:30:00', 'Lab 402');
+
+-- =====================================================
+-- STEP 7: INSERT FEES FOR ALL STUDENTS
+-- =====================================================
+-- Each student has 4 types of fees
+
+INSERT INTO fees (student_id, fee_type, amount, paid_amount, status, due_date, semester) VALUES 
+-- Student 1
+(1, 'TUITION', 50000.00, 50000.00, 'PAID', '2024-12-31', 'Fall 2024'),
+(1, 'LIBRARY', 5000.00, 5000.00, 'PAID', '2024-12-31', 'Fall 2024'),
+(1, 'LAB', 8000.00, 8000.00, 'PAID', '2024-12-31', 'Fall 2024'),
+(1, 'SPORTS', 3000.00, 3000.00, 'PAID', '2024-12-31', 'Fall 2024'),
+
+-- Student 2
+(2, 'TUITION', 50000.00, 50000.00, 'PAID', '2024-12-31', 'Fall 2024'),
+(2, 'LIBRARY', 5000.00, 5000.00, 'PAID', '2024-12-31', 'Fall 2024'),
+(2, 'LAB', 8000.00, 4000.00, 'PARTIAL', '2024-12-31', 'Fall 2024'),
+(2, 'SPORTS', 3000.00, 0.00, 'PENDING', '2024-12-31', 'Fall 2024'),
+
+-- Student 3
+(3, 'TUITION', 50000.00, 50000.00, 'PAID', '2024-12-31', 'Fall 2024'),
+(3, 'LIBRARY', 5000.00, 5000.00, 'PAID', '2024-12-31', 'Fall 2024'),
+(3, 'LAB', 8000.00, 8000.00, 'PAID', '2024-12-31', 'Fall 2024'),
+(3, 'SPORTS', 3000.00, 0.00, 'PENDING', '2024-12-31', 'Fall 2024'),
+
+-- Student 4
+(4, 'TUITION', 50000.00, 50000.00, 'PAID', '2024-12-31', 'Fall 2024'),
+(4, 'LIBRARY', 5000.00, 5000.00, 'PAID', '2024-12-31', 'Fall 2024'),
+(4, 'LAB', 8000.00, 8000.00, 'PAID', '2024-12-31', 'Fall 2024'),
+(4, 'SPORTS', 3000.00, 3000.00, 'PAID', '2024-12-31', 'Fall 2024'),
+
+-- Student 5
+(5, 'TUITION', 50000.00, 25000.00, 'PARTIAL', '2024-12-31', 'Fall 2024'),
+(5, 'LIBRARY', 5000.00, 5000.00, 'PAID', '2024-12-31', 'Fall 2024'),
+(5, 'LAB', 8000.00, 0.00, 'PENDING', '2024-12-31', 'Fall 2024'),
+(5, 'SPORTS', 3000.00, 0.00, 'PENDING', '2024-12-31', 'Fall 2024'),
+
+-- Student 6
+(6, 'TUITION', 50000.00, 50000.00, 'PAID', '2024-12-31', 'Fall 2024'),
+(6, 'LIBRARY', 5000.00, 5000.00, 'PAID', '2024-12-31', 'Fall 2024'),
+(6, 'LAB', 8000.00, 8000.00, 'PAID', '2024-12-31', 'Fall 2024'),
+(6, 'SPORTS', 3000.00, 3000.00, 'PAID', '2024-12-31', 'Fall 2024'),
+
+-- Student 7
+(7, 'TUITION', 50000.00, 50000.00, 'PAID', '2024-12-31', 'Fall 2024'),
+(7, 'LIBRARY', 5000.00, 0.00, 'PENDING', '2024-12-31', 'Fall 2024'),
+(7, 'LAB', 8000.00, 8000.00, 'PAID', '2024-12-31', 'Fall 2024'),
+(7, 'SPORTS', 3000.00, 3000.00, 'PAID', '2024-12-31', 'Fall 2024'),
+
+-- Student 8
+(8, 'TUITION', 50000.00, 50000.00, 'PAID', '2024-12-31', 'Fall 2024'),
+(8, 'LIBRARY', 5000.00, 5000.00, 'PAID', '2024-12-31', 'Fall 2024'),
+(8, 'LAB', 8000.00, 8000.00, 'PAID', '2024-12-31', 'Fall 2024'),
+(8, 'SPORTS', 3000.00, 3000.00, 'PAID', '2024-12-31', 'Fall 2024'),
+
+-- Student 9
+(9, 'TUITION', 50000.00, 50000.00, 'PAID', '2024-12-31', 'Fall 2024'),
+(9, 'LIBRARY', 5000.00, 5000.00, 'PAID', '2024-12-31', 'Fall 2024'),
+(9, 'LAB', 8000.00, 4000.00, 'PARTIAL', '2024-12-31', 'Fall 2024'),
+(9, 'SPORTS', 3000.00, 0.00, 'PENDING', '2024-12-31', 'Fall 2024'),
+
+-- Student 10
+(10, 'TUITION', 50000.00, 50000.00, 'PAID', '2024-12-31', 'Fall 2024'),
+(10, 'LIBRARY', 5000.00, 5000.00, 'PAID', '2024-12-31', 'Fall 2024'),
+(10, 'LAB', 8000.00, 8000.00, 'PAID', '2024-12-31', 'Fall 2024'),
+(10, 'SPORTS', 3000.00, 3000.00, 'PAID', '2024-12-31', 'Fall 2024'),
+
+-- Student 11
+(11, 'TUITION', 50000.00, 0.00, 'PENDING', '2024-12-31', 'Fall 2024'),
+(11, 'LIBRARY', 5000.00, 5000.00, 'PAID', '2024-12-31', 'Fall 2024'),
+(11, 'LAB', 8000.00, 8000.00, 'PAID', '2024-12-31', 'Fall 2024'),
+(11, 'SPORTS', 3000.00, 3000.00, 'PAID', '2024-12-31', 'Fall 2024'),
+
+-- Student 12
+(12, 'TUITION', 50000.00, 50000.00, 'PAID', '2024-12-31', 'Fall 2024'),
+(12, 'LIBRARY', 5000.00, 5000.00, 'PAID', '2024-12-31', 'Fall 2024'),
+(12, 'LAB', 8000.00, 8000.00, 'PAID', '2024-12-31', 'Fall 2024'),
+(12, 'SPORTS', 3000.00, 0.00, 'PENDING', '2024-12-31', 'Fall 2024'),
+
+-- Student 13
+(13, 'TUITION', 50000.00, 50000.00, 'PAID', '2024-12-31', 'Fall 2024'),
+(13, 'LIBRARY', 5000.00, 5000.00, 'PAID', '2024-12-31', 'Fall 2024'),
+(13, 'LAB', 8000.00, 0.00, 'PENDING', '2024-12-31', 'Fall 2024'),
+(13, 'SPORTS', 3000.00, 3000.00, 'PAID', '2024-12-31', 'Fall 2024'),
+
+-- Student 14
+(14, 'TUITION', 50000.00, 50000.00, 'PAID', '2024-12-31', 'Fall 2024'),
+(14, 'LIBRARY', 5000.00, 5000.00, 'PAID', '2024-12-31', 'Fall 2024'),
+(14, 'LAB', 8000.00, 8000.00, 'PAID', '2024-12-31', 'Fall 2024'),
+(14, 'SPORTS', 3000.00, 3000.00, 'PAID', '2024-12-31', 'Fall 2024'),
+
+-- Student 15
+(15, 'TUITION', 50000.00, 50000.00, 'PAID', '2024-12-31', 'Fall 2024'),
+(15, 'LIBRARY', 5000.00, 5000.00, 'PAID', '2024-12-31', 'Fall 2024'),
+(15, 'LAB', 8000.00, 4000.00, 'PARTIAL', '2024-12-31', 'Fall 2024'),
+(15, 'SPORTS', 3000.00, 0.00, 'PENDING', '2024-12-31', 'Fall 2024'),
+
+-- Student 16
+(16, 'TUITION', 50000.00, 50000.00, 'PAID', '2024-12-31', 'Fall 2024'),
+(16, 'LIBRARY', 5000.00, 5000.00, 'PAID', '2024-12-31', 'Fall 2024'),
+(16, 'LAB', 8000.00, 8000.00, 'PAID', '2024-12-31', 'Fall 2024'),
+(16, 'SPORTS', 3000.00, 3000.00, 'PAID', '2024-12-31', 'Fall 2024'),
+
+-- Student 17
+(17, 'TUITION', 50000.00, 25000.00, 'PARTIAL', '2024-12-31', 'Fall 2024'),
+(17, 'LIBRARY', 5000.00, 5000.00, 'PAID', '2024-12-31', 'Fall 2024'),
+(17, 'LAB', 8000.00, 0.00, 'PENDING', '2024-12-31', 'Fall 2024'),
+(17, 'SPORTS', 3000.00, 0.00, 'PENDING', '2024-12-31', 'Fall 2024'),
+
+-- Student 18
+(18, 'TUITION', 50000.00, 50000.00, 'PAID', '2024-12-31', 'Fall 2024'),
+(18, 'LIBRARY', 5000.00, 5000.00, 'PAID', '2024-12-31', 'Fall 2024'),
+(18, 'LAB', 8000.00, 8000.00, 'PAID', '2024-12-31', 'Fall 2024'),
+(18, 'SPORTS', 3000.00, 3000.00, 'PAID', '2024-12-31', 'Fall 2024'),
+
+-- Student 19
+(19, 'TUITION', 50000.00, 50000.00, 'PAID', '2024-12-31', 'Fall 2024'),
+(19, 'LIBRARY', 5000.00, 0.00, 'PENDING', '2024-12-31', 'Fall 2024'),
+(19, 'LAB', 8000.00, 8000.00, 'PAID', '2024-12-31', 'Fall 2024'),
+(19, 'SPORTS', 3000.00, 3000.00, 'PAID', '2024-12-31', 'Fall 2024'),
+
+-- Student 20
+(20, 'TUITION', 50000.00, 50000.00, 'PAID', '2024-12-31', 'Fall 2024'),
+(20, 'LIBRARY', 5000.00, 5000.00, 'PAID', '2024-12-31', 'Fall 2024'),
+(20, 'LAB', 8000.00, 8000.00, 'PAID', '2024-12-31', 'Fall 2024'),
+(20, 'SPORTS', 3000.00, 3000.00, 'PAID', '2024-12-31', 'Fall 2024');
+
+-- =====================================================
+-- STEP 8: INSERT ATTENDANCE RECORDS
+-- =====================================================
+-- Sample attendance for each student (last 30 days)
+
+INSERT INTO attendance (student_id, course_id, date, status) VALUES
+-- Student 1 attendance (CS101, CS201, CS301)
+(1, 1, '2024-11-01', 'PRESENT'),
+(1, 1, '2024-11-04', 'PRESENT'),
+(1, 1, '2024-11-06', 'PRESENT'),
+(1, 1, '2024-11-08', 'PRESENT'),
+(1, 1, '2024-11-11', 'ABSENT'),
+(1, 2, '2024-11-05', 'PRESENT'),
+(1, 2, '2024-11-07', 'PRESENT'),
+(1, 2, '2024-11-12', 'LATE'),
+(1, 3, '2024-11-01', 'PRESENT'),
+(1, 3, '2024-11-08', 'PRESENT'),
+
+-- Student 2 attendance
+(2, 1, '2024-11-01', 'PRESENT'),
+(2, 1, '2024-11-04', 'PRESENT'),
+(2, 1, '2024-11-06', 'PRESENT'),
+(2, 2, '2024-11-05', 'PRESENT'),
+(2, 2, '2024-11-07', 'ABSENT'),
+(2, 5, '2024-11-01', 'PRESENT'),
+(2, 5, '2024-11-06', 'PRESENT'),
+
+-- Student 3 attendance
+(3, 1, '2024-11-01', 'PRESENT'),
+(3, 1, '2024-11-04', 'LATE'),
+(3, 3, '2024-11-01', 'PRESENT'),
+(3, 3, '2024-11-08', 'PRESENT'),
+(3, 8, '2024-11-05', 'PRESENT'),
+
+-- Student 4 attendance
+(4, 2, '2024-11-05', 'PRESENT'),
+(4, 2, '2024-11-07', 'PRESENT'),
+(4, 4, '2024-11-05', 'PRESENT'),
+(4, 4, '2024-11-07', 'PRESENT'),
+(4, 6, '2024-11-05', 'ABSENT'),
+
+-- Student 5 attendance
+(5, 1, '2024-11-01', 'PRESENT'),
+(5, 1, '2024-11-04', 'PRESENT'),
+(5, 3, '2024-11-01', 'PRESENT'),
+(5, 5, '2024-11-01', 'LATE'),
+
+-- Continue for remaining students (shortened for brevity)
+(6, 2, '2024-11-05', 'PRESENT'),
+(7, 1, '2024-11-01', 'PRESENT'),
+(8, 1, '2024-11-01', 'PRESENT'),
+(9, 3, '2024-11-01', 'PRESENT'),
+(10, 1, '2024-11-01', 'PRESENT'),
+(11, 1, '2024-11-01', 'ABSENT'),
+(12, 2, '2024-11-05', 'PRESENT'),
+(13, 1, '2024-11-01', 'LATE'),
+(14, 1, '2024-11-01', 'PRESENT'),
+(15, 3, '2024-11-01', 'PRESENT'),
+(16, 1, '2024-11-01', 'PRESENT'),
+(17, 1, '2024-11-01', 'PRESENT'),
+(18, 2, '2024-11-05', 'PRESENT'),
+(19, 1, '2024-11-01', 'ABSENT'),
+(20, 1, '2024-11-01', 'PRESENT');
+
+-- =====================================================
+-- STEP 9: INSERT NOTIFICATIONS
+-- =====================================================
+INSERT INTO notifications (user_id, title, message, type) VALUES
+(1, 'Welcome!', 'Welcome to Student Portal, Rajesh!', 'INFO'),
+(2, 'Fee Reminder', 'Your lab fee payment is pending', 'WARNING'),
+(3, 'Welcome!', 'Welcome to Student Portal, Amit!', 'INFO'),
+(4, 'Grade Updated', 'Your grade for CS201 has been updated', 'SUCCESS'),
+(5, 'Fee Alert', 'Tuition fee payment is due soon', 'WARNING');
+
+-- =====================================================
+-- VERIFICATION QUERIES
+-- =====================================================
+
+-- Check total counts
+SELECT 
+    (SELECT COUNT(*) FROM students) AS total_students,
+    (SELECT COUNT(*) FROM courses) AS total_courses,
+    (SELECT COUNT(*) FROM enrollments) AS total_enrollments,
+    (SELECT COUNT(*) FROM fees) AS total_fees,
+    (SELECT COUNT(*) FROM attendance) AS total_attendance,
+    (SELECT COUNT(*) FROM timetable) AS total_timetable,
+    (SELECT COUNT(*) FROM users WHERE role='STUDENT') AS student_users;
+
+-- View sample student with all details
+SELECT 
+    s.id,
+    s.student_id,
+    s.name,
+    s.email,
+    s.department,
+    COUNT(DISTINCT e.course_id) AS enrolled_courses,
+    SUM(f.amount) AS total_fees,
+    SUM(f.paid_amount) AS paid_fees,
+    COUNT(DISTINCT a.id) AS attendance_records
+FROM students s
+LEFT JOIN enrollments e ON s.id = e.student_id
+LEFT JOIN fees f ON s.id = f.student_id
+LEFT JOIN attendance a ON s.id = a.student_id
+WHERE s.id = 1
+GROUP BY s.id;
+
+-- View all students with enrollment count
+SELECT 
+    s.id,
+    s.student_id,
+    s.name,
+    s.department,
+    COUNT(e.id) AS courses_enrolled
+FROM students s
+LEFT JOIN enrollments e ON s.id = e.student_id
+GROUP BY s.id
+ORDER BY s.id;
+
+
